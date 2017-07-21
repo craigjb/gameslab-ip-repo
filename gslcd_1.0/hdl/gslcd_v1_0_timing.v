@@ -20,6 +20,7 @@
         output wire VSYNC,
         output wire HSYNC,
         output wire ACTIVE,
+        output wire RD_ACTIVE,
         output wire FRAME_START
     );
 
@@ -29,6 +30,7 @@
     assign VSYNC = (line_reg >= C_LCD_VSYNC_START && line_reg < C_LCD_VSYNC_END);
     assign HSYNC = (pixel_reg >= C_LCD_HSYNC_START && pixel_reg < C_LCD_HSYNC_END);
     assign ACTIVE = (line_reg >= C_LCD_VACTIVE_START && pixel_reg >= C_LCD_HACTIVE_START);
+    assign RD_ACTIVE = (line_reg >= C_LCD_VACTIVE_START && pixel_reg >= (C_LCD_HACTIVE_START - 1));
     assign FRAME_START = (line_reg == 0 && EN == 1'b1);
 
     always @( posedge PCLK )

@@ -2,6 +2,16 @@
 
 module gslcd_v1_0_timing_tb();
 
+    localparam integer C_M00_AXI_BURST_LEN	= 16;
+    localparam integer C_M00_AXI_ID_WIDTH	= 1;
+    localparam integer C_M00_AXI_ADDR_WIDTH	= 32;
+    localparam integer C_M00_AXI_DATA_WIDTH	= 32;
+    localparam integer C_M00_AXI_AWUSER_WIDTH	= 0;
+    localparam integer C_M00_AXI_ARUSER_WIDTH	= 0;
+    localparam integer C_M00_AXI_WUSER_WIDTH	= 0;
+    localparam integer C_M00_AXI_RUSER_WIDTH	= 0;
+    localparam integer C_M00_AXI_BUSER_WIDTH	= 0;
+
 // localparams for the LCD
 localparam integer C_FRAME_WIDTH = 800;
 localparam integer C_FRAME_HEIGHT = 480;

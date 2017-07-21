@@ -77,9 +77,7 @@
 
         output wire LCD_ENABLE,
 
-        output wire [C_S_AXI_DATA_WIDTH-1 : 0] FRAME_PTR,
-
-        output wire [C_S_AXI_DATA_WIDTH-1 : 0] LINE_STRIDE
+        output wire [C_S_AXI_DATA_WIDTH-1 : 0] FRAME_PTR
 	);
 
 	// AXI4LITE signals
@@ -100,10 +98,9 @@
 	// ADDR_LSB = 2 for 32 bits (n downto 2)
 	// ADDR_LSB = 3 for 64 bits (n downto 3)
 	localparam integer ADDR_LSB = (C_S_AXI_DATA_WIDTH/32) + 1;
-	localparam integer OPT_MEM_ADDR_BITS = 1;
+	localparam integer OPT_MEM_ADDR_BITS = 0;
 
 	reg [C_S_AXI_DATA_WIDTH-1:0]	frame_ptr;
-	reg [C_S_AXI_DATA_WIDTH-1:0]	line_stride;
 	reg	[0:0]                       control;
 	wire	 slv_reg_rden;
 	wire	 slv_reg_wren;
@@ -218,34 +215,25 @@
 	  if ( S_AXI_ARESETN == 1'b0 )
 	    begin
 	      frame_ptr <= 0;
-	      line_stride <= 0;
 	      control <= 0;
 	    end 
 	  else begin
 	    if (slv_reg_wren)
 	      begin
 	        case ( axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] )
-	          2'h0:
+	          1'h0:
+                if ( S_AXI_WSTRB[0] == 1 ) begin
+	                control[0:0] <= S_AXI_WDATA[0:0];
+                end
+	          1'h1:
 	            for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
 	              if ( S_AXI_WSTRB[byte_index] == 1 ) begin
 	                // Respective byte enables are asserted as per write strobes 
 	                // Slave register 0
 	                frame_ptr[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
 	              end  
-	          2'h1:
-	            for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
-	              if ( S_AXI_WSTRB[byte_index] == 1 ) begin
-	                // Respective byte enables are asserted as per write strobes 
-	                // Slave register 1
-	                line_stride[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
-	              end  
-	          2'h2:
-                if ( S_AXI_WSTRB[0] == 1 ) begin
-	                control[0:0] <= S_AXI_WDATA[0:0];
-                end
 	          default : begin
 	                      frame_ptr <= frame_ptr;
-	                      line_stride <= line_stride;
 	                      control <= control;
 	                    end
 	        endcase
@@ -355,9 +343,8 @@
 	begin
 	      // Address decoding for reading registers
 	      case ( axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] )
-	        2'h0   : reg_data_out <= frame_ptr;
-	        2'h1   : reg_data_out <= line_stride;
-	        2'h2   : reg_data_out <= {31'b0, control};
+	        1'h0   : reg_data_out <= {31'b0, control};
+	        1'h1   : reg_data_out <= frame_ptr;
 	        default : reg_data_out <= 0;
 	      endcase
 	end
@@ -383,6 +370,5 @@
 
     assign LCD_ENABLE = control[0];
     assign FRAME_PTR = frame_ptr;
-    assign LINE_STRIDE = line_stride;
 
 	endmodule
