@@ -26,17 +26,20 @@
 
     reg [C_LCD_LINE_REG_WIDTH-1 : 0] line_reg = 0;
     reg [C_LCD_PIXEL_REG_WIDTH-1 : 0] pixel_reg = 0;
+    reg hsync = 0;
+    reg vsync = 0;
+    reg active = 0;
+    reg rd_active = 0;
 
-    assign VSYNC = (line_reg >= C_LCD_VSYNC_START && line_reg < C_LCD_VSYNC_END);
-    assign HSYNC = (pixel_reg >= C_LCD_HSYNC_START && pixel_reg < C_LCD_HSYNC_END);
-    assign ACTIVE = (line_reg >= C_LCD_VACTIVE_START && pixel_reg >= C_LCD_HACTIVE_START);
-    assign RD_ACTIVE = (line_reg >= C_LCD_VACTIVE_START && pixel_reg >= (C_LCD_HACTIVE_START - 1));
+    assign VSYNC = vsync;
+    assign HSYNC = hsync;
+    assign ACTIVE = active;
+    assign RD_ACTIVE = rd_active;
     assign FRAME_START = (line_reg == 0 && EN == 1'b1);
 
     always @( posedge PCLK )
 	begin
-      if ( EN == 1'b1)
-        begin
+      if ( EN == 1'b1) begin
           if (pixel_reg == C_LCD_HPIXELS - 1) begin
               pixel_reg <= 0;
               if (line_reg == C_LCD_LINES - 1) begin
@@ -48,12 +51,32 @@
               pixel_reg <= pixel_reg + 1;
               line_reg <= line_reg;
           end
-        end
-      else
-        begin
+          if (line_reg >= C_LCD_VSYNC_START && line_reg < C_LCD_VSYNC_END) begin
+              vsync <= 1;
+          end else begin
+              vsync <= 0;
+          end
+          if (pixel_reg >= C_LCD_HSYNC_START && pixel_reg < C_LCD_HSYNC_END) begin
+              hsync <= 1;
+          end else begin
+              hsync <= 0;
+          end
+          if (line_reg >= C_LCD_VACTIVE_START && pixel_reg >= C_LCD_HACTIVE_START) begin
+              active <= 1;
+          end else begin
+              active <= 0;
+          end
+          if (line_reg >= C_LCD_VACTIVE_START &&
+                          pixel_reg >= (C_LCD_HACTIVE_START - 1) &&
+                          pixel_reg < (C_LCD_HPIXELS - 1)) begin
+              rd_active <= 1;
+          end else begin
+              rd_active <= 0;
+          end
+      end else begin
           line_reg <= 0;
           pixel_reg <= 0;
-        end
+      end
 	end
 
     endmodule

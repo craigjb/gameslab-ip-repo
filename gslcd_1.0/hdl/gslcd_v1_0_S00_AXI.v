@@ -100,13 +100,13 @@
 	localparam integer ADDR_LSB = (C_S_AXI_DATA_WIDTH/32) + 1;
 	localparam integer OPT_MEM_ADDR_BITS = 0;
 
-	reg [C_S_AXI_DATA_WIDTH-1:0]	frame_ptr;
-	reg	[0:0]                       control;
+	reg [C_S_AXI_DATA_WIDTH-1:0]	frame_ptr = 0;
+	reg	[0:0]                       control = 0;
 	wire	 slv_reg_rden;
 	wire	 slv_reg_wren;
 	reg [C_S_AXI_DATA_WIDTH-1:0]	 reg_data_out;
 	integer	 byte_index;
-	reg	 aw_en;
+	reg	 aw_en = 1;
 
 	// I/O Connections assignments
 

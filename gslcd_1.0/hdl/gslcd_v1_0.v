@@ -180,8 +180,8 @@
 
     FIFO36 # (
         .DATA_WIDTH(36),
-        .ALMOST_FULL_OFFSET(13'h10),
-        .ALMOST_EMPTY_OFFSET(13'h10)
+        .ALMOST_FULL_OFFSET(13'h11),
+        .ALMOST_EMPTY_OFFSET(13'h11)
     ) fifo_inst (
         .DI(fifo_din),
         .WREN(fifo_wren),
@@ -199,7 +199,7 @@
 
     gslcd_v1_0_fifo_32to24 fifo_32to24_inst (
         .clk(LCD_PCLK),
-        .reset(FRAME_START),
+        .reset(frame_start),
         .rd_en(rd_active),
         .data32(fifo_dout),
         .data24(data24),

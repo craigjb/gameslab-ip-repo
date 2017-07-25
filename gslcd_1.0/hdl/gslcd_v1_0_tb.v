@@ -5,6 +5,8 @@ module gslcd_v1_0_tb();
     reg AXI_CLK = 0;
     reg LCD_PCLK = 0;
 
+    localparam integer TEST_PAT = 24'habcdef;
+
     localparam integer C_S00_AXI_DATA_WIDTH	= 32;
     localparam integer C_S00_AXI_ADDR_WIDTH	= 4;
     localparam integer C_M00_AXI_BURST_LEN	= 16;
@@ -82,7 +84,7 @@ module gslcd_v1_0_tb();
     wire [3 : 0] m00_axi_arqos;
     wire [C_M00_AXI_ARUSER_WIDTH-1 : 0] m00_axi_aruser;
     wire  m00_axi_arvalid;
-    wire  m00_axi_arready = m00_axi_arvalid;
+    reg  m00_axi_arready = 1;
     wire [C_M00_AXI_ID_WIDTH-1 : 0] m00_axi_rid = 0;
     reg [C_M00_AXI_DATA_WIDTH-1 : 0] m00_axi_rdata = 0;
     wire [1 : 0] m00_axi_rresp = 0;
@@ -100,12 +102,22 @@ module gslcd_v1_0_tb();
     end
 
     integer i;
+    integer off;
+    integer memaddr;
+    reg [7:0] mem [0:(800*480*3)];
 
     initial begin
-        s00_axi_aresetn = 0;
-        #25;
+        for (i = 0; i < (800 * 480); i = i + 1) begin
+            mem[i*3] = i[7:0];
+            mem[(i*3)+1] = i[15:8];
+            mem[(i*3)+2] = i[23:16];
+        end
+
+        s00_axi_aresetn = 1;
+        #45;
         s00_axi_aresetn = 1;
         #15;
+        #60;
 
         #5;
         s00_axi_awvalid = 1;
@@ -118,23 +130,28 @@ module gslcd_v1_0_tb();
             #20;
         end
 
-        while (m00_axi_arvalid == 0) begin
-            #20;
+        while (1) begin
+            while (m00_axi_arvalid == 0) begin
+                #20;
+            end
+            off = m00_axi_araddr;
+            #100;
+            for (i = 0; i < 16; i = i + 1) begin
+                m00_axi_rdata[7:0] <= mem[off + (i * 4) + 0];
+                m00_axi_rdata[15:8] <= mem[off + (i * 4) + 1];
+                m00_axi_rdata[23:16] <= mem[off + (i * 4) + 2];
+                m00_axi_rdata[31:24] <= mem[off + (i * 4) + 3];
+                m00_axi_rvalid = 1;
+                if (i == 15)
+                    m00_axi_rlast = 1;
+                else
+                    m00_axi_rlast = 0;
+                #20;
+            end
+            m00_axi_rdata = 0;
+            m00_axi_rvalid = 0;
+            m00_axi_rlast = 0;
         end
-        #20;
-
-        for (i = 0; i < 16; i = i + 1) begin
-            m00_axi_rdata = i;
-            m00_axi_rvalid = 1;
-            if (i == 15)
-                m00_axi_rlast = 1;
-            else
-                m00_axi_rlast = 0;
-            #20;
-        end
-        m00_axi_rdata = 0;
-        m00_axi_rvalid = 0;
-        m00_axi_rlast = 0;
     end
 
     gslcd_v1_0 dut (

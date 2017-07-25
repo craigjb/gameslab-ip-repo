@@ -178,10 +178,10 @@
     assign M_AXI_ARSIZE = 3'b010;
     assign M_AXI_ARBURST = 2'b01;
     assign M_AXI_ARLOCK = 0;
-    assign M_AXI_ARCACHE = 0;
+    assign M_AXI_ARCACHE = 4'b0010;
     assign M_AXI_ARPROT = 0;
     assign M_AXI_ARQOS = 0;
-    assign M_AXI_ARUSER = 0;
+    assign M_AXI_ARUSER = 1;
     assign M_AXI_RREADY = ~FIFO_FULL;
 
     localparam LCD_READ_COUNT = (C_LCD_DATA_LEN / 4 / C_M_AXI_BURST_LEN) - 1;
@@ -193,7 +193,7 @@
 
     reg [ 1 : 0] state = STATE_IDLE;
     reg arvalid = 0;
-    reg fifo_rst = 1;
+    reg fifo_rst = 0;
     reg [C_M_AXI_ADDR_WIDTH-1 : 0] read_ptr = 0;
     reg [C_LCD_READ_COUNT_LEN-1 : 0] read_count = 0;
     reg [5:0] rst_count = 0;
@@ -215,8 +215,7 @@
         case (state)
             STATE_IDLE: begin
                 if (FRAME_START) begin
-                    fifo_rst <= 1;
-                    rst_count <= 5'd25;
+                    rst_count <= 5'd30;
                     state <= STATE_RST;
                 end else begin
                     state <= STATE_IDLE;
@@ -224,7 +223,11 @@
             end
 
             STATE_RST: begin
-                if (rst_count == 5) begin
+                if (rst_count == 25) begin
+                    state <= STATE_RST;
+                    rst_count <= rst_count - 1;
+                    fifo_rst <= 1;
+                end else if (rst_count == 5) begin
                     state <= STATE_RST;
                     rst_count <= rst_count - 1;
                     fifo_rst <= 0;
@@ -243,7 +246,7 @@
                     arvalid <= 0;
                     state <= STATE_REQ;
                 end else begin
-                    if (M_AXI_ARREADY) begin
+                    if (M_AXI_ARREADY && arvalid) begin
                         arvalid <= 0;
                         state <= STATE_READING;
                     end else begin
@@ -254,14 +257,14 @@
             end
 
             STATE_READING: begin
-                if (M_AXI_RRESP != 2'b00) begin
+                if (M_AXI_RRESP[1] == 1) begin
                     // ERROR happened, reset to idle
                     state <= STATE_IDLE;
                 end else begin
-                    if (M_AXI_RLAST) begin
+                    if (M_AXI_RLAST && M_AXI_RREADY) begin
                         if (read_count != 0) begin
                             state <= STATE_REQ;
-                            read_ptr <= read_ptr + C_M_AXI_BURST_LEN;
+                            read_ptr <= read_ptr + (C_M_AXI_BURST_LEN * 4);
                             read_count <= read_count - 1;
                         end else begin
                             state <= STATE_IDLE;
