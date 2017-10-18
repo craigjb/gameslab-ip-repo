@@ -100,7 +100,7 @@
 
     wire reset = ~s00_axi_aresetn;
 
-    gslcd gslcd_impl(
+    GSLCD gslcd_impl(
         .io_pclk(LCD_PCLK),
         .io_den(LCD_DEN),
         .io_vsync(LCD_VSYNC),

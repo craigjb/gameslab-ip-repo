@@ -3,7 +3,7 @@ package gslcd
 import spinal.core._
 import spinal.lib._
 
-class gslcd_timing(pixels: Int, lines: Int,
+class GSLCDTiming(pixels: Int, lines: Int,
                    hSyncStart: Int, hSyncEnd: Int,
                    vSyncStart: Int, vSyncEnd: Int,
                    hActiveStart: Int, vActiveStart: Int) extends Component {

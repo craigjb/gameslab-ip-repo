@@ -3,7 +3,7 @@ package gslcd
 import spinal.core._
 import spinal.lib._
 
-class gslcd(pixels: Int, lines: Int,
+class GSLCD(pixels: Int, lines: Int,
             hSyncStart: Int, hSyncEnd: Int,
             vSyncStart: Int, vSyncEnd: Int,
             hActiveStart: Int, vActiveStart: Int) extends Component {
@@ -24,10 +24,12 @@ class gslcd(pixels: Int, lines: Int,
   )
 
   val pixelClockArea = new ClockingArea(pixelClockDomain) {
-    val timing = new gslcd_timing(pixels, lines,
-                                  hSyncStart, hSyncEnd,
-                                  vSyncStart, vSyncEnd,
-                                  hActiveStart, vActiveStart)
+    val timing = new GSLCDTiming(
+      pixels, lines,
+      hSyncStart, hSyncEnd,
+      vSyncStart, vSyncEnd,
+      hActiveStart, vActiveStart
+    )
   }
 
     io.den := pixelClockArea.timing.io.active
@@ -40,7 +42,7 @@ class gslcd(pixels: Int, lines: Int,
 object MyTopLevel {
   def main(args: Array[String]) {
     //SpinalVhdl(new gslcd())
-    SpinalVerilog(new gslcd(928, 525, 40, 88, 13, 16, 128, 45))
+    SpinalVerilog(new GSLCD(928, 525, 40, 88, 13, 16, 128, 45))
   }
 }
 
