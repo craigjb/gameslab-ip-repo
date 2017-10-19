@@ -7,7 +7,7 @@
         parameter integer C_S00_AXI_BASEADDR = 32'h0,
         parameter integer C_S00_AXI_HIGHADDR = 32'h0,
 		parameter integer C_S00_AXI_DATA_WIDTH	= 32,
-		parameter integer C_S00_AXI_ADDR_WIDTH	= 4,
+		parameter integer C_S00_AXI_ADDR_WIDTH	= 32,
 
 		// Parameters of Axi Master Bus Interface M00_AXI
 		parameter integer C_M00_AXI_BURST_LEN	= 16,
@@ -99,14 +99,36 @@
 	);
 
     wire reset = ~s00_axi_aresetn;
+    wire [C_S00_AXI_ADDR_WIDTH - 1 : 0] slave_awaddr = s00_axi_awaddr - C_S00_AXI_BASEADDR;
+    wire [C_S00_AXI_ADDR_WIDTH - 1 : 0] slave_araddr = s00_axi_araddr - C_S00_AXI_BASEADDR;
 
     GSLCD gslcd_impl(
+        .clk(s00_axi_aclk),
+        .reset(reset),
+        .io_slaveBus_aw_valid(s00_axi_awvalid),
+        .io_slaveBus_aw_ready(s00_axi_awready),
+        .io_slaveBus_aw_payload_addr(slave_awaddr),
+        .io_slaveBus_aw_payload_prot(s00_axi_awprot),
+        .io_slaveBus_w_valid(s00_axi_wvalid),
+        .io_slaveBus_w_ready(s00_axi_wready),
+        .io_slaveBus_w_payload_data(s00_axi_wdata),
+        .io_slaveBus_w_payload_strb(s00_axi_wstrb),
+        .io_slaveBus_b_valid(s00_axi_bvalid),
+        .io_slaveBus_b_ready(s00_axi_bready),
+        .io_slaveBus_b_payload_resp(s00_axi_bresp),
+        .io_slaveBus_ar_valid(s00_axi_arvalid),
+        .io_slaveBus_ar_ready(s00_axi_arready),
+        .io_slaveBus_ar_payload_addr(slave_araddr),
+        .io_slaveBus_ar_payload_prot(s00_axi_arprot),
+        .io_slaveBus_r_valid(s00_axi_rvalid),
+        .io_slaveBus_r_ready(s00_axi_rready),
+        .io_slaveBus_r_payload_data(s00_axi_rdata),
+        .io_slaveBus_r_payload_resp(s00_axi_rresp),
         .io_pclk(LCD_PCLK),
         .io_den(LCD_DEN),
         .io_vsync(LCD_VSYNC),
         .io_hsync(LCD_HSYNC),
-        .io_data(LCD_DATA),
-        .reset(reset)
+        .io_data(LCD_DATA)
     );
 
 	endmodule
