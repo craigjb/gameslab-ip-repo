@@ -103,6 +103,7 @@ module gslcd_tb();
 
     integer i;
     integer off;
+    integer len;
     integer memaddr;
     reg [7:0] mem [0:(800*480*3)];
 
@@ -134,14 +135,15 @@ module gslcd_tb();
                 #20;
             end
             off = m00_axi_araddr;
+            len = m00_axi_arlen;
             #100;
-            for (i = 0; i < 16; i = i + 1) begin
+            for (i = 0; i <= len; i = i + 1) begin
                 m00_axi_rdata[7:0] <= mem[off + (i * 4) + 0];
                 m00_axi_rdata[15:8] <= mem[off + (i * 4) + 1];
                 m00_axi_rdata[23:16] <= mem[off + (i * 4) + 2];
                 m00_axi_rdata[31:24] <= mem[off + (i * 4) + 3];
                 m00_axi_rvalid = 1;
-                if (i == 15)
+                if (i == len)
                     m00_axi_rlast = 1;
                 else
                     m00_axi_rlast = 0;
