@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites name="results">
+  <testsuite name="all" package="all" tests="0">
+    <testcase classname="GSLCDTiming_test" name="test_reset" ratio_time="2133781923011.701" sim_time_ns="3000000000.0" time="0.001405954360961914" />
+    <testcase classname="GSLCDTiming_test" name="test_sync" ratio_time="13853510236423.488" sim_time_ns="1948804000000000.0" time="140.672217130661" />
+  </testsuite>
+</testsuites>
